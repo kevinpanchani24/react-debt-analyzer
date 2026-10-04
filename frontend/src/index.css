@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #080e1a;
+    --bg-surface: #0f172a;
+    --bg-card: #1e293b;
+    --bg-card-hover: #263348;
+    --border: #2d3f5c;
+    --border-subtle: #1e2d42;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent: #4f6ef7;
+    --accent-glow: rgba(79, 110, 247, 0.2);
+    --success: #22c55e;
+    --warning: #eab308;
+    --danger: #ef4444;
+    --orange: #f97316;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-surface);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
+}
+
+@layer components {
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.75rem;
+  }
+
+  .btn-primary {
+    @apply px-6 py-2.5 rounded-lg font-medium text-sm transition-all duration-200;
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover {
+    background: #3b5bf5;
+    box-shadow: 0 0 20px var(--accent-glow);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .badge-critical {
+    @apply px-2 py-0.5 text-xs rounded font-medium;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+  .badge-high {
+    @apply px-2 py-0.5 text-xs rounded font-medium;
+    background: rgba(249, 115, 22, 0.15);
+    color: #f97316;
+    border: 1px solid rgba(249, 115, 22, 0.3);
+  }
+  .badge-medium {
+    @apply px-2 py-0.5 text-xs rounded font-medium;
+    background: rgba(234, 179, 8, 0.15);
+    color: #eab308;
+    border: 1px solid rgba(234, 179, 8, 0.3);
+  }
+  .badge-low {
+    @apply px-2 py-0.5 text-xs rounded font-medium;
+    background: rgba(100, 116, 139, 0.2);
+    color: #94a3b8;
+    border: 1px solid rgba(100, 116, 139, 0.3);
+  }
+}
