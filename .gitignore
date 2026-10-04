@@ -1,5 +1,7 @@
 backend/node_modules/
 frontend/node_modules/
-backend/.env
 temp/
 *.log
+.env
+frontend/.env
+backend/.env
