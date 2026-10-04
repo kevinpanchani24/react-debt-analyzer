@@ -1,2 +1,5 @@
 [phases.setup]
-nixPkgs = ["nodejs", "git"]
+nixPkgs = ["git", "nodejs_20"]
+
+[start]
+cmd = "npm start"
