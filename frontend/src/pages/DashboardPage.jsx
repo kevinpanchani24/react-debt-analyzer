@@ -150,10 +150,10 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -169,7 +169,7 @@ const DashboardPage = () => {
                 </span>
               )}
             </div>
-            <p className="text-sm font-mono truncate max-w-lg" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-sm font-mono truncate max-w-full sm:max-w-lg" style={{ color: 'var(--text-muted)' }}>
               {summary?.repoUrl}
             </p>
           </div>
@@ -178,7 +178,7 @@ const DashboardPage = () => {
           </button>
         </div>
 
-        <div className="flex gap-1 mt-6 flex-wrap">
+        <div className="flex gap-1 mt-4 sm:mt-6 overflow-x-auto pb-1 scrollbar-hide">
           {TABS.map(({ key, label, count }) => (
             <button key={key} onClick={() => { setTab(key); if (key === 'history') loadHistory(); }}
               className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
@@ -202,8 +202,8 @@ const DashboardPage = () => {
       {/* ── OVERVIEW ─────────────────────────────────────────────────────── */}
       {tab === 'overview' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-6 gap-4">
-            <div className="col-span-2 card p-6 flex flex-col items-center justify-center">
+          <div className="grid grid-cols-1 sm:grid-cols-6 gap-4">
+            <div className="sm:col-span-2 card p-6 flex flex-col items-center justify-center">
               <p className="text-xs uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
                 RCDI Score
               </p>
@@ -214,7 +214,7 @@ const DashboardPage = () => {
                 React Component Debt Index
               </p>
             </div>
-            <div className="col-span-4 grid grid-cols-2 gap-4">
+            <div className="sm:col-span-4 grid grid-cols-2 gap-4">
               <StatCard label="Total Files" value={summary?.totalFiles ?? 0} sub="JS / JSX source files" />
               <StatCard label="Lines of Code" value={(summary?.totalLoc ?? 0).toLocaleString()} sub="across all files" />
               <StatCard label="Components" value={summary?.totalComponents ?? 0} sub="React components detected" />
@@ -224,7 +224,7 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {['critical', 'high', 'medium', 'low'].map(sev => (
               <div key={sev} className="card px-4 py-3 flex items-center gap-3"
                 style={{ borderColor: SEV_COLORS[sev] + '33' }}>
@@ -239,7 +239,7 @@ const DashboardPage = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             <div className="card p-5">
               <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
                 RCDI Dimension Scores
@@ -272,7 +272,7 @@ const DashboardPage = () => {
       {/* ── RCDI BREAKDOWN ───────────────────────────────────────────────── */}
       {tab === 'rcdi' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {DIM_INFO.map(({ key, label, weight, desc }) => {
               const score = dimScores[key] ?? 100;
               const color = score >= 80 ? '#22c55e' : score >= 60 ? '#84cc16' :
@@ -394,41 +394,41 @@ const DashboardPage = () => {
 
       {/* ── FILES ────────────────────────────────────────────────────────── */}
       {tab === 'files' && (
-        <div className="card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                {['File', 'RCDI Score', 'LOC', 'Components', 'Issues'].map(h => (
-                  <th key={h} className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                    style={{ color: 'var(--text-muted)' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {files.map((f, i) => {
-                const s = f.rcdiScore ?? f.maintainabilityScore ?? 0;
-                return (
-                  <tr key={f.filePath || i}
-                    style={{
-                      borderBottom: '1px solid var(--border-subtle)',
-                      background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'
-                    }}>
-                    <td className="px-5 py-3 font-mono text-xs max-w-xs" style={{ color: 'var(--text-secondary)' }}>
-                      <span className="truncate block">{f.filePath}</span>
-                    </td>
-                    <td className="px-5 py-3 font-bold text-sm" style={{ color: sc(s) }}>{s}</td>
-                    <td className="px-5 py-3" style={{ color: 'var(--text-secondary)' }}>{f.loc ?? 0}</td>
-                    <td className="px-5 py-3" style={{ color: 'var(--text-secondary)' }}>{f.componentCount ?? 0}</td>
-                    <td className="px-5 py-3">
-                      <span style={{ color: (f.issueCount ?? 0) > 0 ? 'var(--danger)' : 'var(--text-muted)' }}>
-                        {f.issueCount ?? 0}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="card overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-sm min-w-[600px]">
+          <thead>
+            <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+              {['File', 'RCDI Score', 'LOC', 'Components', 'Issues'].map(h => (
+                <th key={h} className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                  style={{ color: 'var(--text-muted)' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {files.map((f, i) => {
+              const s = f.rcdiScore ?? f.maintainabilityScore ?? 0;
+              return (
+                <tr key={f.filePath || i}
+                  style={{
+                    borderBottom: '1px solid var(--border-subtle)',
+                    background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'
+                  }}>
+                  <td className="px-5 py-3 font-mono text-xs max-w-xs" style={{ color: 'var(--text-secondary)' }}>
+                    <span className="truncate block">{f.filePath}</span>
+                  </td>
+                  <td className="px-5 py-3 font-bold text-sm" style={{ color: sc(s) }}>{s}</td>
+                  <td className="px-5 py-3" style={{ color: 'var(--text-secondary)' }}>{f.loc ?? 0}</td>
+                  <td className="px-5 py-3" style={{ color: 'var(--text-secondary)' }}>{f.componentCount ?? 0}</td>
+                  <td className="px-5 py-3">
+                    <span style={{ color: (f.issueCount ?? 0) > 0 ? 'var(--danger)' : 'var(--text-muted)' }}>
+                      {f.issueCount ?? 0}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        </div>
         </div>
       )}
 

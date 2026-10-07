@@ -47,7 +47,7 @@ const HistoryPage = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8">
+    <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Analysis History</h1>
         <button onClick={() => navigate('/')} className="btn-primary text-sm">+ New Analysis</button>
@@ -69,66 +69,68 @@ const HistoryPage = () => {
         </div>
       ) : (
         <div className="card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                {['Repository', 'Status', 'RCDI', 'Grade', 'Files', 'Issues', 'Date', ''].map(h => (
-                  <th key={h} className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                    style={{ color: 'var(--text-muted)' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {analyses.map((a, i) => {
-                const tot =
-                  (a.issueCount?.critical || 0) + (a.issueCount?.high || 0) +
-                  (a.issueCount?.medium || 0) + (a.issueCount?.low || 0);
-                const score = a.rcdiScore ?? a.maintainabilityScore;
-                return (
-                  <tr key={a._id}
-                    onClick={() => a.status === 'completed'
-                      ? navigate(`/dashboard/${a._id}`)
-                      : navigate(`/analysis/${a._id}`)
-                    }
-                    className="cursor-pointer transition-colors duration-100"
-                    style={{
-                      borderBottom: '1px solid var(--border-subtle)',
-                      background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(79,110,247,0.05)'}
-                    onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'}>
-                    <td className="px-5 py-3 max-w-xs">
-                      <p className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>{a.repoName}</p>
-                      <p className="text-xs font-mono truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>{a.repoUrl}</p>
-                    </td>
-                    <td className="px-5 py-3"><StatusBadge status={a.status} /></td>
-                    <td className="px-5 py-3 font-bold" style={{ color: scoreColor(score) }}>
-                      {score ?? '—'}
-                    </td>
-                    <td className="px-5 py-3 font-bold" style={{ color: 'var(--accent)' }}>
-                      {a.grade ?? '—'}
-                    </td>
-                    <td className="px-5 py-3" style={{ color: 'var(--text-secondary)' }}>{a.totalFiles ?? '—'}</td>
-                    <td className="px-5 py-3" style={{ color: tot > 0 ? 'var(--danger)' : 'var(--text-muted)' }}>
-                      {a.status === 'completed' ? tot : '—'}
-                    </td>
-                    <td className="px-5 py-3 text-xs" style={{ color: 'var(--text-muted)' }}>
-                      {new Date(a.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-5 py-3">
-                      <button onClick={e => handleDelete(e, a._id)}
-                        className="text-xs px-2 py-1 rounded"
-                        style={{ color: 'var(--text-muted)' }}
-                        onMouseEnter={e => e.target.style.color = 'var(--danger)'}
-                        onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>
-                        ✕
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[640px]">
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                  {['Repository', 'Status', 'RCDI', 'Grade', 'Files', 'Issues', 'Date', ''].map(h => (
+                    <th key={h} className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                      style={{ color: 'var(--text-muted)' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {analyses.map((a, i) => {
+                  const tot =
+                    (a.issueCount?.critical || 0) + (a.issueCount?.high || 0) +
+                    (a.issueCount?.medium || 0) + (a.issueCount?.low || 0);
+                  const score = a.rcdiScore ?? a.maintainabilityScore;
+                  return (
+                    <tr key={a._id}
+                      onClick={() => a.status === 'completed'
+                        ? navigate(`/dashboard/${a._id}`)
+                        : navigate(`/analysis/${a._id}`)
+                      }
+                      className="cursor-pointer transition-colors duration-100"
+                      style={{
+                        borderBottom: '1px solid var(--border-subtle)',
+                        background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(79,110,247,0.05)'}
+                      onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'}>
+                      <td className="px-5 py-3 max-w-xs">
+                        <p className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>{a.repoName}</p>
+                        <p className="text-xs font-mono truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>{a.repoUrl}</p>
+                      </td>
+                      <td className="px-5 py-3"><StatusBadge status={a.status} /></td>
+                      <td className="px-5 py-3 font-bold" style={{ color: scoreColor(score) }}>
+                        {score ?? '—'}
+                      </td>
+                      <td className="px-5 py-3 font-bold" style={{ color: 'var(--accent)' }}>
+                        {a.grade ?? '—'}
+                      </td>
+                      <td className="px-5 py-3" style={{ color: 'var(--text-secondary)' }}>{a.totalFiles ?? '—'}</td>
+                      <td className="px-5 py-3" style={{ color: tot > 0 ? 'var(--danger)' : 'var(--text-muted)' }}>
+                        {a.status === 'completed' ? tot : '—'}
+                      </td>
+                      <td className="px-5 py-3 text-xs" style={{ color: 'var(--text-muted)' }}>
+                        {new Date(a.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-5 py-3">
+                        <button onClick={e => handleDelete(e, a._id)}
+                          className="text-xs px-2 py-1 rounded"
+                          style={{ color: 'var(--text-muted)' }}
+                          onMouseEnter={e => e.target.style.color = 'var(--danger)'}
+                          onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>
+                          ✕
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

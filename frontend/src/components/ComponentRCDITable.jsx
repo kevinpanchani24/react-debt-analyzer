@@ -97,8 +97,8 @@ const ComponentRCDITable = ({ components = [] }) => {
         {sorted.length} of {components.length} components — hover dimension scores for source
       </p>
 
-      <div className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }}>
-        <table className="w-full text-xs">
+      <div className="rounded-lg overflow-hidden overflow-x-auto" style={{ border: '1px solid var(--border-subtle)' }}>
+        <table className="w-full text-xs min-w-[700px]">
           <thead>
             <tr style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-subtle)' }}>
               <th className="px-4 py-2.5 text-left font-medium" style={{ color: 'var(--text-muted)' }}>Component</th>

@@ -44,7 +44,7 @@ const ComparisonPage = () => {
   }));
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8">
+    <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
       <h1 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
         RCDI Analysis Results
       </h1>
@@ -53,7 +53,7 @@ const ComparisonPage = () => {
       </p>
 
       {/* Top metric cards */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="card p-5">
           <p className="text-xs uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>RCDI Score</p>
           <p className="text-4xl font-bold" style={{ color: 'var(--accent)' }}>{custom.rcdiScore ?? '—'}</p>
@@ -76,7 +76,7 @@ const ComparisonPage = () => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
         <div className="card p-5">
           <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Issues by Severity</h3>
           <ResponsiveContainer width="100%" height={220}>

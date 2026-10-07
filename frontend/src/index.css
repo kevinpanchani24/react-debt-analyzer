@@ -25,7 +25,8 @@
     box-sizing: border-box;
   }
 
-  html, body {
+  html,
+  body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
@@ -36,13 +37,16 @@
     width: 6px;
     height: 6px;
   }
+
   ::-webkit-scrollbar-track {
     background: var(--bg-surface);
   }
+
   ::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 3px;
   }
+
   ::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
   }
@@ -60,11 +64,13 @@
     background: var(--accent);
     color: white;
   }
+
   .btn-primary:hover {
     background: #3b5bf5;
     box-shadow: 0 0 20px var(--accent-glow);
     transform: translateY(-1px);
   }
+
   .btn-primary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -78,22 +84,36 @@
     color: #ef4444;
     border: 1px solid rgba(239, 68, 68, 0.3);
   }
+
   .badge-high {
     @apply px-2 py-0.5 text-xs rounded font-medium;
     background: rgba(249, 115, 22, 0.15);
     color: #f97316;
     border: 1px solid rgba(249, 115, 22, 0.3);
   }
+
   .badge-medium {
     @apply px-2 py-0.5 text-xs rounded font-medium;
     background: rgba(234, 179, 8, 0.15);
     color: #eab308;
     border: 1px solid rgba(234, 179, 8, 0.3);
   }
+
   .badge-low {
     @apply px-2 py-0.5 text-xs rounded font-medium;
     background: rgba(100, 116, 139, 0.2);
     color: #94a3b8;
     border: 1px solid rgba(100, 116, 139, 0.3);
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
