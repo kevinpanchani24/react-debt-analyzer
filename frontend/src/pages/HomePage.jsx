@@ -9,38 +9,45 @@ const EXAMPLE_REPOS = [
   'https://github.com/alan2207/bulletproof-react',
 ];
 
-const ServerStatus = ({ status }) => {
-  if (!status) return null;
-  if (status === 'checking') return (
-    <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs mb-6"
-      style={{ background: 'rgba(100,116,139,0.1)', border: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
-      <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
-      Checking server status…
+// How long we treat a failing health check as "server waking up" before
+// declaring it genuinely unreachable (Render free tier cold start ≈ 30–60s).
+const WAKE_WINDOW_MS = 90000;
+const RETRY_FAST_MS = 3000;   // while waking
+const RETRY_SLOW_MS = 20000;  // once connected
+
+const ServerStatus = ({ status, elapsed }) => {
+  if (status === 'checking' || status === 'waking') return (
+    <div className="px-4 py-3 rounded-lg text-xs mb-6"
+      style={{ background: 'rgba(79,110,247,0.08)', border: '1px solid rgba(79,110,247,0.25)', color: 'var(--accent)' }}>
+      <div className="flex items-center gap-2 font-semibold">
+        <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        Waking up the server… {elapsed > 0 && <span className="font-mono opacity-80">{elapsed}s</span>}
+      </div>
+      <p className="mt-1.5 opacity-80">
+        The demo runs on a free server that sleeps when idle. It usually takes 30–50 seconds
+        to start — you can paste a repository URL while you wait.
+      </p>
     </div>
   );
   if (status === 'ok') return (
     <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs mb-6"
       style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', color: '#22c55e' }}>
       <span className="w-2 h-2 rounded-full bg-current" />
-      Backend connected — ready to analyse
+      Server connected — ready to analyse
     </div>
   );
   if (status === 'no-db') return (
     <div className="px-4 py-3 rounded-lg text-xs mb-6"
       style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.3)', color: '#eab308' }}>
-      <p className="font-semibold mb-1">⚠ MongoDB is not connected</p>
-      <p className="mb-2 opacity-80">The backend server is running but the database is not connected yet.</p>
-      <p className="font-mono opacity-90 break-words">
-        Option A — Local: <span className="text-white">sudo systemctl start mongodb</span><br />
-        Option B — Atlas: set <span className="text-white">MONGODB_URI</span> in <span className="text-white">backend/.env</span>
-      </p>
+      <p className="font-semibold mb-1">⚠ Database is not connected</p>
+      <p className="opacity-80">The server is running but cannot reach the database. Please try again in a minute.</p>
     </div>
   );
   if (status === 'no-backend') return (
     <div className="px-4 py-3 rounded-lg text-xs mb-6"
       style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#ef4444' }}>
-      <p className="font-semibold mb-1">✕ Backend server is not running</p>
-      <p className="font-mono mt-1 opacity-90 break-words">cd backend &amp;&amp; npm run dev</p>
+      <p className="font-semibold mb-1">✕ Could not reach the server</p>
+      <p className="opacity-80">Please refresh the page in a minute. If it keeps failing, the demo may be temporarily offline.</p>
     </div>
   );
   return null;
@@ -51,32 +58,54 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [serverStatus, setServerStatus] = useState('checking');
+  const [elapsed, setElapsed] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     let cancelled = false;
-    const checkHealth = async () => {
+    let timer;
+    const startedAt = Date.now();
+    const inWakeWindow = () => Date.now() - startedAt < WAKE_WINDOW_MS;
+
+    const ticker = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startedAt) / 1000));
+    }, 1000);
+
+    const check = async () => {
+      let delay = RETRY_FAST_MS;
       try {
-        const res = await api.get('/health', { timeout: 3000 });
+        // Generous timeout: a cold-starting server can take a while to answer
+        const res = await api.get('/health', { timeout: 15000 });
         if (cancelled) return;
         const { db } = res.data;
-        setServerStatus(db === 'connected' ? 'ok' : 'no-db');
+        if (db === 'connected') {
+          setServerStatus('ok');
+          delay = RETRY_SLOW_MS;
+        } else {
+          // Server is up but Mongo is still connecting right after wake-up
+          setServerStatus(inWakeWindow() ? 'waking' : 'no-db');
+        }
       } catch {
         if (cancelled) return;
-        setServerStatus('no-backend');
+        setServerStatus(inWakeWindow() ? 'waking' : 'no-backend');
       }
+      if (!cancelled) timer = setTimeout(check, delay);
     };
-    checkHealth();
-    const interval = setInterval(checkHealth, 4000);
-    return () => { cancelled = true; clearInterval(interval); };
+
+    check();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      clearInterval(ticker);
+    };
   }, []);
+
+  const serverReady = serverStatus === 'ok';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const trimmed = repoUrl.trim();
-    if (!trimmed) return;
-    if (serverStatus === 'no-backend') { setError('Backend server is not running.'); return; }
-    if (serverStatus === 'no-db') { setError('MongoDB is not connected.'); return; }
+    if (!trimmed || !serverReady) return;
     setLoading(true);
     setError(null);
     try {
@@ -114,7 +143,7 @@ const HomePage = () => {
         className="w-full max-w-xl rounded-2xl p-5 sm:p-8"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: '0 0 60px rgba(79,110,247,0.06)' }}
       >
-        <ServerStatus status={serverStatus} />
+        <ServerStatus status={serverStatus} elapsed={elapsed} />
         <form onSubmit={handleSubmit}>
           <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
             GitHub Repository URL
@@ -134,14 +163,15 @@ const HomePage = () => {
             <button
               type="submit"
               className="btn-primary w-full sm:w-auto"
-              disabled={loading || !repoUrl.trim() || serverStatus !== 'ok'}
+              disabled={loading || !repoUrl.trim() || !serverReady}
+              title={!serverReady ? 'Waiting for the server to start…' : undefined}
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Starting…
                 </span>
-              ) : 'Analyze'}
+              ) : serverReady ? 'Analyze' : 'Starting server…'}
             </button>
           </div>
           {error && (
@@ -158,6 +188,7 @@ const HomePage = () => {
             {EXAMPLE_REPOS.map((repo) => (
               <button
                 key={repo}
+                type="button"
                 onClick={() => setRepoUrl(repo)}
                 className="text-left text-xs px-3 py-2 rounded-lg font-mono transition-colors duration-150 break-all"
                 style={{ background: 'var(--bg-surface)', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}
